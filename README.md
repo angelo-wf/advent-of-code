@@ -1,6 +1,10 @@
 # aoc-22
 Advent of Code 2022
 
-My solutions to [Advent of Code 2022](https://adventofcode.com/).
+My solutions to [Advent of Code 2022](https://adventofcode.com/) in Javascript, run with Node.js.
 
-Each day has it's own folder, the script within will print both needed values as the last (only?) output.
+Each day has its own folder, the script within with the same name will print both answers.
+The input is expected to be found in `input.txt` (in that day's folder).
+
+The `fetchinput.js` script can be used to fetch the input for a given day and store it in its folder (run with `node fetchinput.js <day>`).
+It requires a file named `session.txt` to be created containing the session-token from adventofcode.com, stored there in a cookie as `session=<token>`.
