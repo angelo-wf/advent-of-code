@@ -16,7 +16,7 @@ const tdata = `1000
 
 10000`;
 
-const data = fs.readFileSync("input.txt", "utf-8");
+const data = fs.readFileSync("input.txt", "utf-8").slice(0, -1);
 
 console.log(Math.max(...data.split("\n\n").map(i => i.split("\n").map(s => +s).reduce((a, s) => a + s, 0))));
 
