@@ -32,12 +32,12 @@ function parseData(lines) {
       node.neightbors[i] = map[node.neightbors[i]];
     }
   }
-  return [nodes[0], nodes];
+  return [map["AA"], nodes];
 }
 
 // quite slow (~3 minutes on M1 Pro)
 function getMaxSteam(node, nodes, count, totalSteam, steam, prev) {
-  if(count === 25) {
+  if(count === 30) {
     return totalSteam;
   }
   let options = [];
@@ -59,6 +59,38 @@ function getMaxSteam(node, nodes, count, totalSteam, steam, prev) {
   }
   return Math.max(...options);
 }
+
+// attempt at optimisation, helps on p1-example, but not part 1 (does not open all in time?)
+
+// function getMaxSteamOpt(node, nodes, count, totalSteam, steam, prev, purge = {c: Infinity, s: 0}) {
+//   // if we are at count and another path had everything open at this point with a better score
+//   // don't bother looking further
+//   if(count >= purge.c && totalSteam <= purge.s) return 0;
+//   if(count === 30) {
+//     return totalSteam;
+//   }
+//   let options = [];
+//   let allOpen = nodes.map(n => n.opened || n.rate === 0).reduce((a, s) => !s ? false : a, true);
+//   if(allOpen) {
+//     // stay here and wait
+//     purge.c = count;
+//     purge.s = totalSteam;
+//     // calculate total steam after time is up
+//     return totalSteam + (30 - count) * steam;
+//   } else {
+//     // open valve if closed
+//     if(!node.opened && node.rate !== 0) {
+//       node.opened = true;
+//       options.push(getMaxSteam(node, nodes, count + 1, totalSteam + steam, steam + node.rate, null, purge));
+//       node.opened = false; // restore state
+//     }
+//     // go over neightbors
+//     for(let n of node.neightbors) {
+//       if(n.name !== prev) options.push(getMaxSteam(n, nodes, count + 1, totalSteam + steam, steam, node.name, purge));
+//     }
+//   }
+//   return Math.max(...options);
+// }
 
 // DOES NOT WORK!!
 // when running for 12 minutes on example input, it gives 575 as the total steam at that point,
