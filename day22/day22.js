@@ -57,7 +57,49 @@ function parseData(data) {
   return [map, ops];
 }
 
-function followPath(map, path) {
+// maps from x,y moving by dx,dy to rx,rx moving by rdx,rdy, and reverse, for count spots
+// nd is new direction if coming from x,y side, rnd when coming from rx,ry sde
+// positions are first row/col 'outside' map for both x,y and rx,ry
+// destination is ajusted to be on the map on destination side (using nd/rnd)
+function addMapping(map, x, y, dx, dy, rx, ry, rdx, rdy, count, nd, rnd) {
+  // reverse of dir after reverse move is direction move needs to be
+  let fnd = (nd + 2) % 4;
+  let frnd = (rnd + 2) % 4;
+  for(let i = 0; i < count; i++) {
+    map.set(`${x},${y},${frnd}`, {x: rx + dirs[nd][0], y: ry + dirs[nd][1], dir: nd});
+    map.set(`${rx},${ry},${fnd}`, {x: x + dirs[rnd][0], y: y + dirs[rnd][1], dir: rnd});
+    x += dx; y += dy;
+    rx += rdx; ry += rdy;
+  }
+}
+
+function createMapping(test) {
+  // see diagram.png for color-reference
+  let map = new Map();
+  if(test) {
+    //               x  y  dx dy  rx  ry rdx rdy c nd rnd
+    addMapping(map,  1, 4, 1, 0, 12,  0, -1,  0, 4, 1, 1); // orange
+    addMapping(map,  5, 4, 1, 0,  8,  1,  0,  1, 4, 0, 1); // red
+    addMapping(map, 13, 1, 0, 1, 17, 12,  0, -1, 4, 2, 2); // yellow
+    addMapping(map, 13, 5, 0, 1, 16,  8, -1,  0, 4, 1, 2); // green
+    addMapping(map,  5, 9, 1, 0,  8, 12,  0, -1, 4, 0, 3); // cyan
+    addMapping(map,  1, 9, 1, 0, 12, 13, -1,  0, 4, 3, 3); // blue
+    addMapping(map,  0, 5, 0, 1, 16, 13, -1,  0, 4, 3, 0); // violet
+  } else {
+    //                x    y  dx dy  rx   ry rdx rdy  c nd rnd
+    addMapping(map,   1, 100, 1, 0,  50,  51, 0,  1, 50, 0, 1); // red
+    addMapping(map,   0, 101, 0, 1,  50,  50, 0, -1, 50, 0, 0); // blue
+    addMapping(map,   0, 151, 0, 1,  51,   0, 1,  0, 50, 1, 0); // violet
+    addMapping(map,   1, 201, 1, 0, 101,   0, 1,  0, 50, 1, 3); // cyan
+    addMapping(map,  51, 151, 1, 0,  51, 151, 0,  1, 50, 2, 3); // green
+    addMapping(map, 101, 101, 0, 1, 151,  50, 0, -1, 50, 2, 2); // orange
+    addMapping(map, 101,  51, 1, 0, 101,  51, 0,  1, 50, 2, 3); // yellow
+  }
+  return map;
+}
+
+function followPath(map, path, cubed = false) {
+  let cmap = createMapping(data === tdata);
   let pos = null;
   for(let y = 1; y < map.length; y++) {
     for(let x = 1; x < map[0].length; x++) {
@@ -81,26 +123,36 @@ function followPath(map, path) {
       for(let i = 0; i < op.m; i++) {
         // attempt to move
         let old = [pos[0], pos[1]];
+        let oldDir = dir;
         pos[0] += dirs[dir][0];
         pos[1] += dirs[dir][1];
         if(map[pos[1]][pos[0]] === 2) {
-          // loop to other end of map
-          let [x, y] = pos;
-          let [dx, dy] = dirs[(dir + 2) % 4];
-          while(true) {
-            x += dx;
-            y += dy;
-            if(map[y][x] === 2) {
-              // back up one
-              pos[0] = x - dx;
-              pos[1] = y - dy;
-              break;
+          if(!cubed) {
+            // loop to other end of map
+            let [x, y] = pos;
+            let [dx, dy] = dirs[(dir + 2) % 4];
+            while(true) {
+              x += dx;
+              y += dy;
+              if(map[y][x] === 2) {
+                // back up one
+                pos[0] = x - dx;
+                pos[1] = y - dy;
+                break;
+              }
             }
+          } else {
+            // loop according to mapping
+            let n = cmap.get(`${pos[0]},${pos[1]},${dir}`);
+            if(n === undefined) console.error("Unmapped spot at " + pos.join(","));
+            pos = [n.x, n.y];
+            dir = n.dir;
           }
         }
         // if could not move, restore old pos
         if(map[pos[1]][pos[0]] === 1) {
           pos = [old[0], old[1]];
+          dir = oldDir;
         }
       }
     }
@@ -109,3 +161,5 @@ function followPath(map, path) {
 }
 
 console.log(followPath(...parseData(data)));
+
+console.log(followPath(...parseData(data), true));

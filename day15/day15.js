@@ -98,7 +98,6 @@ function findSpot(lines) {
   return x * 4000000 + row;
 }
 
-// test input needs row 10 instead of 2000000
-console.log(findCountRow(data.split("\n").map(parseLine), 2000000));
+console.log(findCountRow(data.split("\n").map(parseLine), data === tdata ? 10 : 2000000));
 
 console.log(findSpot(data.split("\n").map(parseLine)));
