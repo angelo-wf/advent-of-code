@@ -122,6 +122,50 @@ function findHeight(data) {
   return simulator.findHeighestSpot();
 }
 
-// P2: only keep top X rows
+function getCacheString(simulator) {
+  let str = "";
+  for(let i = 0; i < 30; i++) {
+    let rowCount = simulator.cols[0].length;
+    let v = (
+      simulator.cols[1][rowCount - i] + simulator.cols[2][rowCount - i] * 2 + simulator.cols[3][rowCount - i] * 4 +
+      simulator.cols[4][rowCount - i] * 8 + simulator.cols[5][rowCount - i] * 16 + simulator.cols[6][rowCount - i] * 32 +
+      simulator.cols[7][rowCount - i] * 64
+    );
+    str += v + ",";
+  }
+  return str + `${simulator.curWind},${simulator.curPiece}`;
+}
+
+function findHeightLong(data) {
+  // check for loops in the structure by keeping a cache of all found configs(top 30 rows) + curPiece + curWind
+  let simulator = new Simlator(data);
+  let cache = new Map();
+  let i = 0;
+  while(true) {
+    let c = cache.get(getCacheString(simulator));
+    if(c !== undefined) {
+      // we found a loop
+      let loopLength = i - c.i;
+      let heightNow = simulator.findHeighestSpot();
+      let loopHeight = heightNow - c.h;
+      // calculate how many times we loop until we are just below 1000000000000 (1e12), skip to there
+      let addTimes = Math.floor((1000000000000 - i) / loopLength);
+      i += (addTimes * loopLength);
+      // simulate amount to get to 1000000000000
+      for(let j = i; j < 1000000000000; j++) {
+        simulator.simulatePiece();
+      }
+      // and add skipped amount of loopheights to result
+      return simulator.findHeighestSpot() + addTimes * loopHeight;
+    } else {
+      // insert into cache
+      cache.set(getCacheString(simulator), {i: i, h: simulator.findHeighestSpot()});
+    }
+    simulator.simulatePiece();
+    i++;
+  }
+}
 
 console.log(findHeight(data));
+
+console.log(findHeightLong(data));
