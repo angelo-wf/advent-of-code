@@ -35,21 +35,26 @@ function parseData(lines) {
   return [map["AA"], nodes];
 }
 
-// quite slow (~3 minutes on M1 Pro)
-// (pruning helps on example, but not on input (probably does not end up opening all))
-function getMaxSteam(node, nodes, countLeft, totalSteam = 0, steam = 0, prev = null, prune = {s: 0, c: 0}) {
-  // if we are at count left and another path had everything open at this point with a better score
-  // don't bother looking further
-  if(countLeft <= prune.c && totalSteam <= prune.s) return 0;
+function getMaxSteam(node, nodes, countLeft, totalSteam = 0, steam = 0, prev = null, prune = {s: 0, a: null}) {
+  // calculate max steam if not done yet
+  if(prune.a === null) {
+    prune.a = 0;
+    for(let n of nodes) prune.a += n.rate; 
+  }
+  // if having everything open from now on still gives us a worse score than already found, prune
+  if((totalSteam + prune.a * countLeft) <= prune.s) return 0;
   if(countLeft === 0) {
+    if(totalSteam > prune.s) prune.s = totalSteam;
     return totalSteam;
   }
   let options = [];
   let allOpen = nodes.map(n => n.opened || n.rate === 0).reduce((a, s) => !s ? false : a, true);
   if(allOpen) {
     // stay here and wait
-    prune.c = countLeft;
-    prune.s = totalSteam;
+    if((totalSteam + steam * countLeft) > prune.s) {
+      // if we get a better score, record it
+      prune.s = totalSteam + steam * countLeft;
+    }
     return totalSteam + steam * countLeft;
   } else {
     // open valve if closed
@@ -70,19 +75,27 @@ function getMaxSteam(node, nodes, countLeft, totalSteam = 0, steam = 0, prev = n
 // when running for 12 minutes on example input, it gives 575 as the total steam at that point,
 // but it should be 573 according to example (and that should be the best)
 // this off-by-2 propagnates all the way to the end (gets 1709 instead of 1707)
-// also really slow (hasn't run fully on input (after ~10 minutes)) (but example is helped a lot by pruning)
-function getMaxSteamElephants(node1, node2, nodes, countLeft, totalSteam = 0, steam = 0, prev1 = null, prev2 = null, prune = {s: 0, c: 0}) {
-  // if we are at count left and another path had everything open at this point with a better score, prune
-  if(countLeft <= prune.c && totalSteam <= prune.s) return 0;
+// also really slow (hasn't run fully on input (after ~10 minutes))
+function getMaxSteamElephants(node1, node2, nodes, countLeft, totalSteam = 0, steam = 0, prev1 = null, prev2 = null, prune = {s: 0, a: null}) {
+  // calculate max steam if not done yet
+  if(prune.a === null) {
+    prune.a = 0;
+    for(let n of nodes) prune.a += n.rate; 
+  }
+  // if having everything open from now on still gives us a worse score than already found, prune
+  if((totalSteam + prune.a * countLeft) <= prune.s) return 0;
   if(countLeft === 0) {
+    if(totalSteam > prune.s) prune.s = totalSteam;
     return totalSteam;
   }
   let options = [];
   let allOpen = nodes.map(n => n.opened || n.rate === 0).reduce((a, s) => !s ? false : a, true);
   if(allOpen) {
     // stay here and wait
-    prune.c = countLeft;
-    prune.s = totalSteam;
+    if((totalSteam + steam * countLeft) > prune.s) {
+      // if we get a better score, record it
+      prune.s = totalSteam + steam * countLeft;
+    }
     return totalSteam + steam * countLeft;
   } else {
     // both open valve
