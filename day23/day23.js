@@ -140,4 +140,4 @@ function getEmpty(map) {
 
 console.log(getEmpty(doRounds(parseData(data), 10)));
 
-console.log(doRoundsUntilDone(parseData(data), 10));
+console.log(doRoundsUntilDone(parseData(data)));

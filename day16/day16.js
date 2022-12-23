@@ -37,12 +37,10 @@ function parseData(lines) {
 
 function getMaxSteam(node, nodes, countLeft, totalSteam = 0, steam = 0, prev = null, prune = {s: 0, a: null}) {
   // calculate max steam if not done yet
-  if(prune.a === null) {
-    prune.a = 0;
-    for(let n of nodes) prune.a += n.rate; 
-  }
+  if(prune.a === null) {prune.a = 0; for(let n of nodes) prune.a += n.rate;}
   // if having everything open from now on still gives us a worse score than already found, prune
   if((totalSteam + prune.a * countLeft) <= prune.s) return 0;
+  // if done, return, else, check if all valves open and return early, or go one level deeper taking a action (move/open)
   if(countLeft === 0) {
     if(totalSteam > prune.s) prune.s = totalSteam;
     return totalSteam;
@@ -63,27 +61,22 @@ function getMaxSteam(node, nodes, countLeft, totalSteam = 0, steam = 0, prev = n
       options.push(getMaxSteam(node, nodes, countLeft - 1, totalSteam + steam, steam + node.rate, null, prune));
       node.opened = false; // restore state
     }
-    // go over neightbors
+    // go over neightbors, except the one we just came from
     for(let n of node.neightbors) {
       if(n.name !== prev) options.push(getMaxSteam(n, nodes, countLeft - 1, totalSteam + steam, steam, node.name, prune));
     }
   }
-  return Math.max(...options);
+  let m = 0;
+  for(let option of options) {if(option > m) m = option;}
+  return m;
 }
 
-// DOES NOT WORK!!
-// when running for 12 minutes on example input, it gives 575 as the total steam at that point,
-// but it should be 573 according to example (and that should be the best)
-// this off-by-2 propagnates all the way to the end (gets 1709 instead of 1707)
-// also really slow (hasn't run fully on input (after ~10 minutes))
 function getMaxSteamElephants(node1, node2, nodes, countLeft, totalSteam = 0, steam = 0, prev1 = null, prev2 = null, prune = {s: 0, a: null}) {
   // calculate max steam if not done yet
-  if(prune.a === null) {
-    prune.a = 0;
-    for(let n of nodes) prune.a += n.rate; 
-  }
+  if(prune.a === null) {prune.a = 0; for(let n of nodes) prune.a += n.rate;}
   // if having everything open from now on still gives us a worse score than already found, prune
   if((totalSteam + prune.a * countLeft) <= prune.s) return 0;
+  // if done, return, else, check if all valves open and return early, or go one level deeper taking a combination of actions (move/open) for both solvers
   if(countLeft === 0) {
     if(totalSteam > prune.s) prune.s = totalSteam;
     return totalSteam;
@@ -103,42 +96,36 @@ function getMaxSteamElephants(node1, node2, nodes, countLeft, totalSteam = 0, st
       node1.opened = true;
       node2.opened = true;
       options.push(getMaxSteamElephants(node1, node2, nodes, countLeft - 1, totalSteam + steam, steam + node1.rate + node2.rate, null, null, prune));
-      node1.opened = false; // restore state
+      node1.opened = false;
       node2.opened = false;
     }
-    // 1 opens valve, 2 moves or stays still
+    // 1 opens valve, 2 moves
     if(!node1.opened && node1.rate !== 0) {
       node1.opened = true;
       for(let n of node2.neightbors) {
-        if(n.name !== prev2) options.push(getMaxSteamElephants(n, node2, nodes, countLeft - 1, totalSteam + steam, steam + node1.rate, null, node2.name, prune));
+        if(n.name !== prev2) options.push(getMaxSteamElephants(node1, n, nodes, countLeft - 1, totalSteam + steam, steam + node1.rate, null, node2.name, prune));
       }
-      // options.push(getMaxSteamElephants(node1, node2, nodes, countLeft - 1, totalSteam + steam, steam + node1.rate, null, prev2, prune));
       node1.opened = false;
     }
-    // 1 moves or stays still, 2 opens valve
+    // 1 moves, 2 opens valve
     if(!node2.opened && node2.rate !== 0) {
       node2.opened = true;
       for(let n of node1.neightbors) {
-        if(n.name !== prev1) options.push(getMaxSteamElephants(node1, n, nodes, countLeft - 1, totalSteam + steam, steam + node2.rate, node1.name, null, prune));
+        if(n.name !== prev1) options.push(getMaxSteamElephants(n, node2, nodes, countLeft - 1, totalSteam + steam, steam + node2.rate, node1.name, null, prune));
       }
-      // options.push(getMaxSteamElephants(node1, node2, nodes, countLeft - 1, totalSteam + steam, steam + node2.rate, prev1, null, prune));
       node2.opened = false;
     }
-    // both move or one moves
+    // both move
     for(let n1 of node1.neightbors) {
       for(let n2 of node2.neightbors) {
         // for each combo
         if(n1.name !== prev1 && n2.name !== prev2) options.push(getMaxSteamElephants(n1, n2, nodes, countLeft - 1, totalSteam + steam, steam, node1.name, node2.name, prune));
       }
     }
-    // for(let n1 of node1.neightbors) {
-    //   if(n1.name !== prev1) options.push(getMaxSteamElephants(n1, node2, nodes, countLeft - 1, totalSteam + steam, steam, node1.name, prev2, prune));
-    // }
-    // for(let n2 of node2.neightbors) {
-    //   if(n2.name !== prev2) options.push(getMaxSteamElephants(node1, n2, nodes, countLeft - 1, totalSteam + steam, steam, prev1, node2.name, prune));
-    // }
   }
-  return Math.max(...options);
+  let m = 0;
+  for(let option of options) {if(option > m) m = option;}
+  return m;
 }
 
 function findWithElephants(data) {
@@ -148,4 +135,4 @@ function findWithElephants(data) {
 
 console.log(getMaxSteam(...parseData(data.split("\n")), 30));
 
-// console.log(findWithElephants(data.split("\n")));
+console.log(findWithElephants(data.split("\n")));

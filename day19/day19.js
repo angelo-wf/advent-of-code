@@ -11,7 +11,7 @@ function findBest(map, iterLeft, oreb = 1, clayb = 0, obsib = 0, geodeb = 0, ore
   // next minute create, then 1, then 2 + 1, then 3 + 2 + 1, etc...
   if(geodec + (geodeb * iterLeft) + ((iterLeft * (iterLeft - 1) / 2)) <= prune.s) return 0;
   if(iterLeft === 0) {
-    // record best store if better
+    // record best score if better
     if(geodec > prune.s) prune.s = geodec;
     return geodec;
   }

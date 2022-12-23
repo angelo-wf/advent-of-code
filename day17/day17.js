@@ -124,6 +124,7 @@ function findHeight(data) {
 
 function getCacheString(simulator) {
   let str = "";
+  // assume top 30 rows is enough to properly detect loops
   for(let i = 0; i < 30; i++) {
     let rowCount = simulator.cols[0].length;
     let v = (
