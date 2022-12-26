@@ -8,7 +8,7 @@ const tdata = `#.######
 #<^v^^>#
 ######.#`;
 
-const data = tdata; // fs.readFileSync("input.txt", "utf-8").slice(0, -1);
+const data = fs.readFileSync("input.txt", "utf-8").slice(0, -1);
 
 const dirs = [[1, 0], [0, 1], [-1, 0], [0, -1]];
 const rdirs = [[-1, 0], [0, -1], [1, 0], [0, 1]];
@@ -101,45 +101,58 @@ function getNeightbors(map, node) {
   return nbs;
 }
 
-// implement a*, bfs is not doing it
-function search(map) {
-  let queue = ["1,0,0"];
-  let visited = new Set();
-  while(queue.length > 0) {
-    let test = queue.shift();
-    visited.add(test);
-    if(map.m.get(test.split(",").slice(0, 2).join(",")).end) {
-      return +test.split(",")[2];
-    }
-    for(let n of getNeightbors(map, test)) {
-      if(!visited.has(n)) queue.push(n);
-    }
-  }
-  return 0;
+function heuristic(map, node) {
+  // manhattan distance to end
+  let [x, y, _] = node.split(",").map(i => +i);
+  return Math.abs(map.w - 1 - x) + Math.abs(map.h - y);
 }
 
-// does not work (stack limit)
-// function search(map, x, y, c = 0, prune = {s: Infinity}) {
-//   if((c + Math.abs(map.w - 1 - x) + Math.abs(map.h - y)) >= prune.s) return Infinity;
-//   if(map.m.get(`${x},${y}`).end) {
-//     if(c < prune.s) prune.s = c;
-//     return c;
-//   }
-//   let options = [];
-//   updateBlizzards(map, false);
-//   for(let d of dirs) {
-//     let o = map.m.get(`${x + d[0]},${y + d[1]}`);
-//     if(!o.wall && !o.blizzards.length > 0) {
-//       options.push(search(map, x + d[0], y + d[1], c + 1, prune));
-//     }
-//   }
-//   if(map.m.get(`${x},${y}`).blizzards.length === 0) {
-//     options.push(search(map, x, y, c + 1, prune));
-//   }
-//   updateBlizzards(map, true);
-//   return Math.min(...options);
-// }
+function getDefault(map, key, def) {
+  let i = map.get(key);
+  if(i === undefined) return def;
+  return i;
+}
 
+function astar(map, start, endCheck) {
+  let openSet = new Set();
+  openSet.add(start);
+  let cameFrom = new Map();
+  let gScore = new Map();
+  gScore.set(start, 0);
+  let fScore = new Map();
+  fScore.set(start, heuristic(map, start));
+  while(openSet.size !== 0) {
+    // find node with lowest fscore
+    let current = null;
+    let lowestCost = Infinity;
+    for(let item of openSet) {
+      if(fScore.get(item) < lowestCost) {
+        current = item;
+        lowestCost = fScore.get(item);
+      }
+    }
+    if(map.m.get(current.split(",").slice(0, 2).join(","))[endCheck]) return +current.split(",").slice(2);
+    openSet.delete(current);
+    for(let n of getNeightbors(map, current)) {
+      let tenativeG = gScore.get(current) + 1;
+      if(tenativeG < getDefault(gScore, n, Infinity)) {
+        cameFrom.set(n, current);
+        gScore.set(n, tenativeG);
+        fScore.set(n, tenativeG + heuristic(map, n));
+        if(!openSet.has(n)) openSet.add(n);
+      }
+    }
+  }
+  return -1;
+}
+
+function triplePath(map) {
+  let s1 = astar(map, "1,0,0", "end");
+  let s2 = astar(map, `${map.w - 1},${map.h},${s1}`, "start");
+  return astar(map, "1,0," + s2, "end");
+}
+
+// used for debugging
 function drawMap(map) {
   let str = "";
   for(let y = 0; y <= map.h; y++) {
@@ -155,5 +168,6 @@ function drawMap(map) {
   console.log(str);
 }
 
-console.log(search(parseData(data)));
+console.log(astar(parseData(data), "1,0,0", "end"));
 
+console.log(triplePath(parseData(data)));
