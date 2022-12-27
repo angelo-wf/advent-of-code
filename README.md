@@ -6,6 +6,8 @@ My solutions to [Advent of Code 2022](https://adventofcode.com/) in Javascript, 
 Each day has its own folder, the script within with the same name will print both answers.
 The input is expected to be found in `input.txt` (in that day's folder).
 
+`runall.js` can be used to run all days, provided each day's input has been fetched. It will print the soultions, and (roughly) how long each day took.
+
 The `fetchinput.js` script can be used to fetch the input for a given day and store it in its folder (run with `node fetchinput.js <day>`).
 It requires a file named `session.txt` to be created containing (just) the session-token `<token>` from adventofcode.com, which is stored there in a cookie as `session=<token>`.
 
