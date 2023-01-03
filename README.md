@@ -23,5 +23,5 @@ The `fetchinput.js` script can be used to fetch the input(s) for all days/a give
 - If only a day is given, it will fetch the day for the current year.
 - If only a year is given, it will fetch all days for that year.
 - If both are given, that day for that year will be fetched (can be given in either order).
-- It requires a file named `session.txt` to be created containing (just) the session-token `<token>` from adventofcode.com, which is stored there in a cookie as `session=<token>`.
+- It requires a file named `session.txt` to be created containing (just) the session-token from adventofcode.com, which is stored there in a cookie called `session`.
 - Calls are throttled (once every 10 seconds), and the User-Agent indicates this repo as the source, as required by the [Automation guidelines](https://reddit.com/r/adventofcode/wiki/faqs/automation).

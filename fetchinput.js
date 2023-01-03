@@ -22,7 +22,7 @@ function fetchInput(year, day) {
   return new Promise((resolve, reject) => {
     let options = {
       headers: {
-        "User-Agent": "github.com/elzo-d/aoc-22 (fetchinput.js / node)",
+        "User-Agent": "github.com/elzo-d/advent-of-code (fetchinput.js / node)",
         "Cookie": `session=${session}`
       }
     };
