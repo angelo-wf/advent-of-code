@@ -4,3 +4,5 @@
 session.txt
 # don't save inputs
 input.txt
+# don't save inputs in input folder
+inputs/*.txt
