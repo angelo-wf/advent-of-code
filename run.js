@@ -29,7 +29,8 @@ async function run(year, day, part) {
           // run this day
           try {
             const {part1, part2} = await import(`./${i}/day${j}.js`);
-            const data = fs.readFileSync(`./inputs/${i}_${j}.txt`, "utf-8").slice(0, -1);
+            let data = fs.readFileSync(`./inputs/${i}_${j}.txt`, "utf-8");
+            if(data.slice(-1) === "\n") data = data.slice(0, -1);
             if(part === undefined || part === 1) yearTotal += runPart(part1, data, i, j, 1);
             if(part === undefined || part === 2) yearTotal += runPart(part2, data, i, j, 2);
           } catch(e) {
