@@ -1,7 +1,7 @@
 
 const tdata = `Comet can fly 14 km/s for 10 seconds, but then must rest for 127 seconds.
 Dancer can fly 16 km/s for 11 seconds, but then must rest for 162 seconds.`;
-// part 1: 2660
+// part 1: 2660, part 2: 1564
 
 function parse(lines) {
   let res = [];
@@ -14,7 +14,8 @@ function parse(lines) {
       restTime: +parts[13],
       timer: 0,
       resting: true,
-      distance: 0
+      distance: 0,
+      points: 0
     });
   }
   return res;
@@ -30,6 +31,11 @@ function simulate(deer, time) {
       if(!d.resting) d.distance += d.speed;
       d.timer--;
     }
+    let max = 0;
+    for(let d of deer) if(d.distance > max) max = d.distance;
+    for(let d of deer) {
+      if(d.distance === max) d.points++;
+    }
   }
   return deer;
 }
@@ -39,5 +45,5 @@ export function part1(data) {
 }
 
 export function part2(data) {
-  return 0;
+  return Math.max(...simulate(parse(data), 2503).map(d => d.points));
 }
