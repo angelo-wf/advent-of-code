@@ -16,6 +16,7 @@ const scan = {
 
 function parse(lines) {
   let aunts = [];
+  // lines in format: 'Sue <NUM>: goldfish: <A>, cars: <B>, samoyeds: <C>'
   for(let line of lines.split("\n")) {
     // assume Sue-s are ordered
     let parts = line.split(/[,:]?\s/);
