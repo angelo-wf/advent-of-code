@@ -1,8 +1,5 @@
 
-const tdata = `Sue 1: perfumes: 3, cars: 2, children: 5
-Sue 2: children: 3, trees: 3, samoyeds: 2
-Sue 3: trees: 6, children: 3, vizslas: 0`;
-// manually created testdata (none was provided); part 1: 2, part 2: 3
+// no testdata was provided
 
 const scan = {
   children: 3,
