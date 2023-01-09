@@ -10,6 +10,19 @@ const tdata = `1
 10
 11`;
 
+function getSetWithCount(arr, count) {
+  if(count == 1) {
+    let out = [];
+    for(let item of arr) out.push([item]);
+    return out;
+  }
+  let out = [];
+  for(let i = 0; i < arr.length - count + 1; i++) {
+    getSetWithCount(arr.slice(i + 1), count - 1).forEach(v => out.push([arr[i]].concat(v)));
+  }
+  return out;
+}
+
 function canSplitInParts(arr, max, parts) {
   for(let i = (2 ** arr.length) - 1; i >= 0; i--) {
     // for each bit of value, check if using those array indices gives max
@@ -40,40 +53,30 @@ function canSplitInParts(arr, max, parts) {
 function splitInParts(arr, parts) {
   let max = arr.reduce((a, s) => a + s, 0) / parts;
   let res = [];
-  let shortest = Infinity;
-  for(let i = (2 ** arr.length) - 1; i >= 0; i--) {
-    // for each bit of value, if set, add array value to total and increment count
-    let out1sum = 0;
-    let out1count = 0;
-    for(let j = 0; j < arr.length; j++) {
-      if((i >> j) & 1) {
-        out1sum += arr[j];
-        out1count++;
+  let numArr = [];
+  for(let i = 0; i < arr.length; i++) numArr.push(i);
+  for(let i = 1; i <= arr.length; i++) {
+    // for each amount of items
+    for(let option of getSetWithCount(numArr, i)) {
+      // get sum of adding up, check if valid
+      let out1sum = option.reduce((a, s) => a + arr[s], 0);
+      if(out1sum === max) {
+        // if total reached max, get split arrays and add if rest is also divisible
+        let out1 = [];
+        let out2 = [];
+        for(let i = 0; i < arr.length; i++) {
+          if(option.includes(i)) {
+            out1.push(arr[i]);
+          } else {
+            out2.push(arr[i]);
+          }
+        }
+        if(canSplitInParts(out2, max, parts - 1)) res.push(out1);
       }
     }
-    if(out1sum === max && out1count <= shortest) {
-      // if total matches max, and no shorter one was found yet, get arrays for split
-      let out1 = [];
-      let out2 = [];
-      for(let j = 0; j < arr.length; j++) {
-        if((i >> j) & 1) {
-          out1.push(arr[j]);
-        } else {
-          out2.push(arr[j]);
-        }
-      }
-      if(canSplitInParts(out2, max, parts - 1)) {
-        if(out1.length <= shortest) {
-          shortest = out1.length;
-          res.push(out1);
-        }
-      }
-    }
+    // if we found solutions, don't check longer sets
+    if(res.length > 0) break;
   }
-  let rres = [];
-  shortest = Infinity;
-  for(let item of res) if(item.length < shortest) shortest = item.length;
-  for(let item of res) if(item.length === shortest) rres.push(item);
   return res;
 }
 
