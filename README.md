@@ -6,6 +6,7 @@ Each year has its own folder, each day has its own file within that folder calle
 - Each day exports 2 functions named `part1` and `part2`, which run those parts.
 - The functions take the input as a string and give the ouput as something `toString()`-able.
 - Additional files for a day are prefixed with `day<day>_`.
+- Shared files do not have a day indication.
 
 The `run.js` script can be used to run a part/both parts of a day/all days of a year/all years.
 - Run as `node run.js [<year> [<day> [<part>]]]`.
